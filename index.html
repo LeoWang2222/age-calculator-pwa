@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f5ed">
+  <meta name="description" content="离线计算公历与农历年龄、生日倒计时和出生档案。">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="时光年龄">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="./styles.css">
+  <title>时光年龄 · 年龄计算器</title>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="masthead">
+      <div class="brand"><div class="brand-mark" aria-hidden="true">时</div><span>时光年龄</span></div>
+      <span class="header-date" id="header-date"></span>
+    </header>
+
+    <section class="intro" aria-labelledby="page-title">
+      <div class="eyebrow"><span class="eyebrow-line"></span> YOUR TIME STORY</div>
+      <h1 id="page-title">每一岁，<br><em>都有自己的光。</em></h1>
+      <p>从出生那天起，记录与你有关的每一段时光。</p>
+      <div class="intro-art" aria-hidden="true"><span class="orbit orbit-one"></span><span class="orbit orbit-two"></span><span class="art-core">✦</span><span class="art-dot dot-one"></span><span class="art-dot dot-two"></span></div>
+    </section>
+
+    <section class="form-card" aria-labelledby="form-title">
+      <div class="section-head"><span class="section-index">01 / 开始</span><h2 id="form-title">你的出生日期</h2></div>
+      <div class="segmented" role="tablist" aria-label="生日历法">
+        <button type="button" class="segment active" id="solar-tab" role="tab" aria-selected="true" aria-controls="solar-fields">公历生日</button>
+        <button type="button" class="segment" id="lunar-tab" role="tab" aria-selected="false" aria-controls="lunar-fields">农历生日</button>
+      </div>
+      <form id="age-form" novalidate>
+        <div id="solar-fields" class="date-fields" role="tabpanel" aria-labelledby="solar-tab">
+          <label>出生年份<select id="solar-year" aria-label="公历出生年份"></select></label>
+          <div class="date-row"><label>月份<select id="solar-month" aria-label="公历出生月份"></select></label><label>日期<select id="solar-day" aria-label="公历出生日期"></select></label></div>
+        </div>
+        <div id="lunar-fields" class="date-fields" role="tabpanel" aria-labelledby="lunar-tab" hidden>
+          <label>农历年份<select id="lunar-year" aria-label="农历出生年份"></select></label>
+          <div class="date-row"><label>农历月份<select id="lunar-month" aria-label="农历出生月份"></select></label><label>日期<select id="lunar-day" aria-label="农历出生日期"></select></label></div>
+          <p class="field-help">支持闰月。选择后会自动换算为公历日期。</p>
+        </div>
+        <div class="form-divider"></div>
+        <label class="target-label">时光目标 <span>用于展示年龄进度，可随时调整</span><select id="target-age" aria-label="时光目标年龄"></select></label>
+        <p class="form-error" id="form-error" role="alert" hidden></p>
+        <button class="primary-button" type="submit">开启我的时光档案 <span aria-hidden="true">↗</span></button>
+      </form>
+    </section>
+
+    <section id="results" class="results" aria-live="polite" hidden>
+      <div class="section-head result-heading"><span class="section-index">02 / 你的故事</span><h2>时光档案</h2></div>
+      <article class="age-hero">
+        <div class="hero-top"><span>截至 <span id="as-of"></span></span><span class="hero-spark">✦</span></div>
+        <div class="hero-age"><strong id="age-years"></strong><span>周岁</span></div>
+        <p id="precise-age" class="precise-age"></p>
+        <div class="hero-rule"></div>
+        <div class="hero-facts"><div><small>虚岁</small><strong id="virtual-age"></strong></div><div><small>来到世界</small><strong id="life-days"></strong></div><div><small>出生印记</small><strong id="identity"></strong></div></div>
+      </article>
+
+      <h3 class="group-title">下一次生日 <span>值得期待的日子</span></h3>
+      <div class="birthday-grid">
+        <article class="birthday-card"><div class="card-kicker"><span class="circle-icon">☀</span> 公历生日</div><p class="count"><strong id="solar-count"></strong><span>天后</span></p><p class="birthday-date" id="solar-next"></p><p class="birthday-note" id="solar-note" hidden></p></article>
+        <article class="birthday-card"><div class="card-kicker"><span class="circle-icon">☾</span> 农历生日</div><p class="count"><strong id="lunar-count"></strong><span>天后</span></p><p class="birthday-date" id="lunar-next"></p><p class="birthday-note" id="lunar-note" hidden></p></article>
+      </div>
+
+      <article class="detail-card"><div class="card-title-row"><h3>出生档案</h3><span>✦</span></div><dl><div><dt>公历日期</dt><dd id="solar-birth"></dd></div><div><dt>农历日期</dt><dd id="lunar-birth"></dd></div><div><dt>干支纪日</dt><dd id="ganzhi-birth"></dd></div><div><dt>生肖 · 星座</dt><dd id="zodiac-birth"></dd></div></dl><p class="detail-note">干支按节气所在日期切换，未区分出生时辰。</p></article>
+
+      <article class="progress-card"><div class="progress-head"><div><h3>时光进度</h3><p id="progress-caption"></p></div><strong id="progress-number"></strong></div><div class="progress-track"><span id="progress-fill"></span></div><p>以你设定的年龄为目标，慢慢走，好好生活。</p></article>
+      <div class="result-actions"><button type="button" id="copy-button">复制结果</button><button type="button" id="clear-button">清空结果</button></div>
+    </section>
+
+    <footer><span>每一个今天，都值得被记住。</span><small>离线可用 · 数据只在此设备计算</small></footer>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

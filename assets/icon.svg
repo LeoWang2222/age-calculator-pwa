@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="110" fill="#215b4c"/>
+  <circle cx="256" cy="256" r="171" fill="none" stroke="#a9d5ba" stroke-width="3" opacity=".5"/>
+  <circle cx="256" cy="256" r="126" fill="none" stroke="#a9d5ba" stroke-width="2" opacity=".65"/>
+  <circle cx="256" cy="256" r="79" fill="#f4edda"/>
+  <text x="256" y="286" text-anchor="middle" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="78" font-weight="700" fill="#215b4c">时</text>
+  <circle cx="388" cy="122" r="15" fill="#d9a972"/>
+</svg>

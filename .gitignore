@@ -1,0 +1,11 @@
+# Keep the private handoff document out of any future GitHub repository.
+/project handoff.md
+
+# Local source comparison scripts, generated previews and redundant data.
+/tools/
+/preview-*.png
+/calendar-data.json
+
+# Local Python artifacts.
+__pycache__/
+*.pyc
