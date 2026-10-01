@@ -46,6 +46,10 @@
         </div>
         <div class="form-divider"></div>
         <label class="target-label">时光目标 <span>用于展示年龄进度，可随时调整</span><select id="target-age" aria-label="时光目标年龄"></select></label>
+        <div class="default-settings">
+          <div class="default-actions"><button type="button" id="save-default">设为默认生日</button><button type="button" id="remove-default" hidden>取消默认</button></div>
+          <p id="default-status" role="status">保存后，下次打开自动计算。仅保存在此设备。</p>
+        </div>
         <p class="form-error" id="form-error" role="alert" hidden></p>
         <button class="primary-button" type="submit">开启我的时光档案 <span aria-hidden="true">↗</span></button>
       </form>

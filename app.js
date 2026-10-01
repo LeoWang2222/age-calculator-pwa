@@ -5,6 +5,17 @@ const state={mode:'solar',lastBirth:null,lastResult:null};
 const solarYear=$('solar-year'),solarMonth=$('solar-month'),solarDay=$('solar-day');
 const lunarYear=$('lunar-year'),lunarMonth=$('lunar-month'),lunarDay=$('lunar-day');
 const target=$('target-age');
+const DEFAULT_KEY='age-notebook.default.v1';
+function selectedDefault(){const lunar=state.mode==='lunar';const [month,leap]=lunarMonth.value.split('-').map(Number);return {version:1,mode:state.mode,year:Number(lunar?lunarYear.value:solarYear.value),month:lunar?month:Number(solarMonth.value),day:Number(lunar?lunarDay.value:solarDay.value),leap:lunar&&Boolean(leap),targetAge:Number(target.value)};}
+function defaultBirth(value){if(!value||value.version!==1||!['solar','lunar'].includes(value.mode)||![value.year,value.month,value.day,value.targetAge].every(Number.isInteger)||typeof value.leap!=='boolean')throw new Error('默认生日格式无效');return value.mode==='lunar'?lunarToSolar(value.year,value.month,value.day,value.leap):iso(value.year,value.month,value.day);}
+function defaultStatus(message,exists){$('default-status').textContent=message;if(exists!==undefined)$('remove-default').hidden=!exists;}
+function restoreDefault(){let raw;try{raw=localStorage.getItem(DEFAULT_KEY);}catch{defaultStatus('此浏览器无法读取默认生日，仍可手动计算。');return;}if(!raw)return;try{const value=JSON.parse(raw);const birth=defaultBirth(value);calculate(birth,todayLocal(),value.targetAge);
+  target.value=String(value.targetAge);setMode(value.mode);
+  if(value.mode==='solar'){solarYear.value=String(value.year);solarMonth.value=String(value.month);updateSolarDays();solarDay.value=String(value.day);}else{lunarYear.value=String(value.year);updateLunarMonths();lunarMonth.value=`${value.month}-${Number(value.leap)}`;updateLunarDays();lunarDay.value=String(value.day);}
+  defaultStatus('已载入默认生日；修改后可重新设为默认。',true);run(birth,false);
+}catch{defaultStatus('默认生日未能载入，请重新设置。',true);}}
+function saveDefault(){try{const value=selectedDefault();const birth=defaultBirth(value);calculate(birth,todayLocal(),value.targetAge);try{localStorage.setItem(DEFAULT_KEY,JSON.stringify(value));}catch{defaultStatus('此浏览器无法保存，请检查是否允许网站存储。');return;}defaultStatus('默认生日已保存，下次打开会自动计算。',true);run(birth,false);}catch(error){showError(error.message);}}
+function removeDefault(){try{localStorage.removeItem(DEFAULT_KEY);defaultStatus('已取消默认生日，可随时重新设置。',false);}catch{defaultStatus('未能取消默认，请检查是否允许网站存储。');}}
 function fill(el,items,value){el.replaceChildren(...items.map(([v,label])=>{const o=document.createElement('option');o.value=String(v);o.textContent=label;return o;}));if(value!==undefined&&items.some(([v])=>String(v)===String(value)))el.value=String(value);}
 function range(a,b){return Array.from({length:b-a+1},(_,i)=>a+i);}
 function localDate(s){const p=parts(s);return `${p.year}年${String(p.month).padStart(2,'0')}月${String(p.day).padStart(2,'0')}日`;}
@@ -33,11 +44,13 @@ function init(){const today=todayLocal();$('header-date').textContent=briefDate(
   fill(lunarYear,range(1900,maxYear).reverse().map(y=>[y,`${y} 年`]),2000);updateLunarMonths();fill(target,range(1,150).map(n=>[n,`${n} 岁`]),80);
   solarYear.addEventListener('change',updateSolarDays);solarMonth.addEventListener('change',updateSolarDays);lunarYear.addEventListener('change',updateLunarMonths);lunarMonth.addEventListener('change',updateLunarDays);
   $('solar-tab').addEventListener('click',()=>setMode('solar'));$('lunar-tab').addEventListener('click',()=>setMode('lunar'));
-  $('age-form').addEventListener('submit',e=>{e.preventDefault();let birth;if(state.mode==='solar')birth=iso(Number(solarYear.value),Number(solarMonth.value),Number(solarDay.value));else{try{const [month,leap]=lunarMonth.value.split('-').map(Number);birth=lunarToSolar(Number(lunarYear.value),month,Number(lunarDay.value),Boolean(leap));}catch(error){showError(error.message);return;}}run(birth);});
+  $('age-form').addEventListener('submit',e=>{e.preventDefault();try{run(defaultBirth(selectedDefault()));}catch(error){showError(error.message);}});
+  $('save-default').addEventListener('click',saveDefault);$('remove-default').addEventListener('click',removeDefault);
   target.addEventListener('change',()=>{if(state.lastBirth)run(state.lastBirth,false);});
   $('clear-button').addEventListener('click',()=>{state.lastBirth=null;state.lastResult=null;$('results').hidden=true;hideError();window.scrollTo({top:0,behavior:'smooth'});});
   $('copy-button').addEventListener('click',async()=>{if(!state.lastResult)return;try{await navigator.clipboard.writeText(resultText(state.lastResult));$('copy-button').textContent='已复制 ✓';}catch{const text=resultText(state.lastResult);const el=document.createElement('textarea');el.value=text;document.body.append(el);el.select();const ok=document.execCommand('copy');el.remove();$('copy-button').textContent=ok?'已复制 ✓':'复制失败';}});
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){const now=todayLocal();$('header-date').textContent=briefDate(now);if(state.lastBirth&&state.lastResult?.today!==now)run(state.lastBirth,false);}});
-  if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  restoreDefault();
+  if('serviceWorker' in navigator&&location.protocol!=='file:'){let reloadForUpdate=Boolean(navigator.serviceWorker.controller);navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloadForUpdate){reloadForUpdate=false;location.reload();}});navigator.serviceWorker.register('./service-worker.js').catch(()=>{});}
 }
 init();
